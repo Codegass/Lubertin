@@ -1,10 +1,7 @@
-Lubertin
+# Lubertin
 ========
 
-# My First Repository
-## This is a secondary heading
-### This is a tertiary heading
+## A Machine Learning algo module
 
-* First item in list
-* Second item in list
-* Third item in list
+**The index of the algos**
+* [Self Orgnized Maps](https://github.com/Codegass/Lubertin/blob/master/self_orgnized_maps.py)

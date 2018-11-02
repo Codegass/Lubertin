@@ -103,10 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# video and jps
-*.avi
-baby/
-*.DS_Store
-*.weights
-*.74
+
 
