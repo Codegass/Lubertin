@@ -219,5 +219,5 @@ if __name__ == '__main__':
     som = SOMs(200, colors, 400, 200, 0.3, False, 1, 3)
     som.train()
 
-    plt.imshow(som.map,interpolation='gaussian')
+    plt.imshow(som.result(),interpolation='gaussian')
     plt.show()
