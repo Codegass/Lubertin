@@ -137,7 +137,7 @@ class SOMs(object):
         '''
         t means the current time-step(iteration of the loop)
         '''
-        dampingParameter = self.round/math.log(self.originalLearningRate)
+        dampingParameter = self.round  # /math.log(self.originalLearningRate)
         self.learningRate = self.originalLearningRate * math.exp(-t/dampingParameter)
 
     def Adjusting(self, node, randomChosenData):
@@ -182,7 +182,8 @@ class SOMs(object):
 
     def result(self):
         for j in range(len(self.map)):
-            self.resultmap.append(self.map[j].node)
+            self.resultmap.append(self.map[j].node[0])
+        self.resultmap = np.array(self.resultmap)  # convert the arrays to np.array in order to matching the plt requirements
         return self.resultmap
 
 
@@ -194,30 +195,48 @@ if __name__ == '__main__':
     # print(a.neighbourhood(400, b))
 
     # Training inputs for RGBcolors
+    # colors = np.array(
+    #      [[0, 0, 0],
+    #       [0, 0, 1],
+    #       [0, 0, 139],
+    #       [135, 206, 235],
+    #       [122, 197, 205],
+    #       [132, 112, 255],
+    #       [0, 255, 0],
+    #       [255, 0, 0],
+    #       [0., 255, 255],
+    #       [255, 0., 255],
+    #       [255, 255, 0.],
+    #       [255, 255, 255],
+    #       [105, 105, 105],
+    #       [190, 190, 190],
+    #       [211, 211, 211]])
+    # Training inputs for RGBcolors
     colors = np.array(
-         [[0, 0, 0],
-          [0, 0, 1],
-          [0, 0, 139],
-          [135, 206, 235],
-          [122, 197, 205],
-          [132, 112, 255],
-          [0, 255, 0],
-          [255, 0, 0],
-          [0., 255, 255],
-          [255, 0., 255],
-          [255, 255, 0.],
-          [255, 255, 255],
-          [105, 105, 105],
-          [190, 190, 190],
-          [211, 211, 211]])
+         [[0., 0., 0.],
+          [0., 0., 1.],
+          [0., 0., 0.5],
+          [0.125, 0.529, 1.0],
+          [0.33, 0.4, 0.67],
+          [0.6, 0.5, 1.0],
+          [0., 1., 0.],
+          [1., 0., 0.],
+          [0., 1., 1.],
+          [1., 0., 1.],
+          [1., 1., 0.],
+          [1., 1., 1.],
+          [.33, .33, .33],
+          [.5, .5, .5],
+          [.66, .66, .66]])
+
     color_names = \
         ['black', 'blue', 'darkblue', 'skyblue',
          'cadetblue', 'LightSlateBlue', 'green', 'red',
          'cyan', 'violet', 'yellow', 'white',
          'dimGrey', 'mediumgrey', 'lightgrey']
 
-    som = SOMs(200, colors, 400, 200, 0.3, False, 1, 3)
+    som = SOMs(15, colors, 400, 200, 0.3, True, 1, 3)
     som.train()
 
-    plt.imshow(som.result(),interpolation='gaussian')
+    plt.imshow(som.result(), interpolation='gaussian')
     plt.show()
