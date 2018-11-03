@@ -1,3 +1,11 @@
+#####
+# Author : Codegass
+
+# TODO: the map's generation is too random, till now is still a list
+# we need to change it to a n by m dimention matrix.
+# the matrix should be sorted, the loction of each node should have
+# relationship with the node's parameters.
+#####
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -20,7 +28,7 @@ class node:
     BE CAREFUL: the node is defualtly init as int
                 the upper bounding is limited as 256
     '''
-    def __init__(self, isFloat=False, *shape):
+    def __init__(self, isFloat, shape):
         try:
             if type(shape) == int or type(shape) == tuple:
                 pass
@@ -58,7 +66,7 @@ class SOMs(object):
     round is for the trainning times
     shape is for shape of the node.
 
-    data 里的每一个点应该和node的shape一致, 并且一定是numpy array
+    nodes in the dataset shoulf have the same shape as som's nodes shape, and shold be numpy array.
     """
     def __init__(self, radius, data, nodeQuantity, rounds,
                  learningRate=0.1, isFloat=False, *shape):
@@ -68,15 +76,17 @@ class SOMs(object):
             self.map.append(node(isFloat, shape))  # initialize the nodes.
 
         self.neighbournodes = []
-        self.data = data  # the training data set
-        
+        self.data = data  # the training data set which is a np.array
+
         try:
-            if type(data) == list:
+            if type(data) == np.ndarray:
+                self.data = self.data.tolist()
+            elif type(data) == list:
                 pass
             else:
-                raise ERROR('The data set should be a list.')
-            
-            if type(data[0]) == numpy.ndarray:
+                raise ERROR('The data set should be a list')
+
+            if type(data[0]) == np.ndarray:
                 pass
             else:
                 raise ERROR('The nodes in the data set should be numpy array.')
@@ -90,8 +100,10 @@ class SOMs(object):
         self.learningRate = learningRate
         self.BMU = None
         self.round = rounds
-        
-    def BMU(self, randomChosenData):
+        self.index = []
+        self.resultmap = []
+
+    def BMUCalculate(self, randomChosenData):
         BMUindex = 0  # the index number of the best matching unit in the map list
         BMUindexDist = 0
         for i in range(self.quantity):
@@ -104,14 +116,13 @@ class SOMs(object):
 
     def neighbours(self):
         for i in range(self.quantity):
+            # print(i)
             node = self.BMU.neighbourhood(self.radius, self.map[i])
             if node == 0:
                 pass
             else:
                 self.neighbournodes.append(node)
-                self.map.remove(node)
-
-
+                self.index.append(i)
 
     def radiusDamping(self, t):
         '''
@@ -138,7 +149,7 @@ class SOMs(object):
         dist = np.linalg.norm(self.BMU.node - node.node)
         Theta = math.exp(-(dist**2)/(2*(self.radius)**2))  # Theta is the amount of learning should fade over distance similar to the Gaussian decay.
         node.node = node.node + Theta * self.learningRate * (randomChosenData - node.node)
-        self.map.append(node)
+        return node
 
     def train(self):
         '''
@@ -151,23 +162,28 @@ class SOMs(object):
         5. Again from step one.
         '''
         for t in range(self.round):
-            print('\nEpoch %d / %d' % (t, self.round))
+            print('\nEpoch %d / %d' % (t+1, self.round))
             print('Choosing a node from the data set randomly.')
             target = random.sample(self.data, 1)
-            self.BMU(target)
+            self.BMUCalculate(target)
             print('Best match unit finded.')
             self.radiusDamping(t)
             self.neighbours()
-            print('All neighbours finded. This BMU has %d neighbours include itself.' % len(self.neighbours))
-            if len(self.neighbours) == 0:
+            print('All neighbours finded. This BMU has %d neighbours include itself.' % len(self.neighbournodes))
+            if len(self.neighbournodes) == 0:
                 pass
-            else:    
+            else:
                 self.learningRateDamping(t)
-                for nodeIndex in range(len(self.neighbours)):
-                    self.Adjusting(self.neighbournodes[nodeIndex], target)
-                    print('.',end='')
-        
-        print('Training ended.')
+                for nodeIndex in range(len(self.neighbournodes)):
+                    node_next = self.Adjusting(self.neighbournodes[nodeIndex], target)
+                    self.map[self.index[nodeIndex]] = node_next
+                    print('.', end='')
+        print('\nTraining ended.')
+
+    def result(self):
+        for j in range(len(self.map)):
+            self.resultmap.append(self.map[j].node)
+        return self.resultmap
 
 
 if __name__ == '__main__':
@@ -176,7 +192,32 @@ if __name__ == '__main__':
     # print(a.node)
     # print(b.node)
     # print(a.neighbourhood(400, b))
-    data = []
 
+    # Training inputs for RGBcolors
+    colors = np.array(
+         [[0, 0, 0],
+          [0, 0, 1],
+          [0, 0, 139],
+          [135, 206, 235],
+          [122, 197, 205],
+          [132, 112, 255],
+          [0, 255, 0],
+          [255, 0, 0],
+          [0., 255, 255],
+          [255, 0., 255],
+          [255, 255, 0.],
+          [255, 255, 255],
+          [105, 105, 105],
+          [190, 190, 190],
+          [211, 211, 211]])
+    color_names = \
+        ['black', 'blue', 'darkblue', 'skyblue',
+         'cadetblue', 'LightSlateBlue', 'green', 'red',
+         'cyan', 'violet', 'yellow', 'white',
+         'dimGrey', 'mediumgrey', 'lightgrey']
 
-    c = SOMs(radius=400, data, 10, 40, 1, 3)
+    som = SOMs(200, colors, 400, 200, 0.3, False, 1, 3)
+    som.train()
+
+    plt.imshow(som.map,interpolation='gaussian')
+    plt.show()
