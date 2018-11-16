@@ -115,6 +115,7 @@ class SOMs(object):
         # return self.map[BMUindex]
 
     def neighbours(self):
+        self.neighbournodes = []
         for i in range(self.quantity):
             # print(i)
             node = self.BMU.neighbourhood(self.radius, self.map[i])
@@ -132,6 +133,7 @@ class SOMs(object):
         '''
         dampingParameter = self.round/math.log(self.originalradius)
         self.radius = self.originalradius * math.exp(-t/dampingParameter)
+        print('the radius is', self.radius)
 
     def learningRateDamping(self, t):
         '''
@@ -139,6 +141,7 @@ class SOMs(object):
         '''
         dampingParameter = self.round  # /math.log(self.originalLearningRate)
         self.learningRate = self.originalLearningRate * math.exp(-t/dampingParameter)
+        print('the learning rate is', self.learningRate)
 
     def Adjusting(self, node, randomChosenData):
         '''
@@ -177,7 +180,7 @@ class SOMs(object):
                 for nodeIndex in range(len(self.neighbournodes)):
                     node_next = self.Adjusting(self.neighbournodes[nodeIndex], target)
                     self.map[self.index[nodeIndex]] = node_next
-                    print('.', end='')
+                    # print('.', end='')
         print('\nTraining ended.')
 
     def result(self):
@@ -195,48 +198,56 @@ if __name__ == '__main__':
     # print(a.neighbourhood(400, b))
 
     # Training inputs for RGBcolors
-    # colors = np.array(
-    #      [[0, 0, 0],
-    #       [0, 0, 1],
-    #       [0, 0, 139],
-    #       [135, 206, 235],
-    #       [122, 197, 205],
-    #       [132, 112, 255],
-    #       [0, 255, 0],
-    #       [255, 0, 0],
-    #       [0., 255, 255],
-    #       [255, 0., 255],
-    #       [255, 255, 0.],
-    #       [255, 255, 255],
-    #       [105, 105, 105],
-    #       [190, 190, 190],
-    #       [211, 211, 211]])
-    # Training inputs for RGBcolors
     colors = np.array(
-         [[0., 0., 0.],
-          [0., 0., 1.],
-          [0., 0., 0.5],
-          [0.125, 0.529, 1.0],
-          [0.33, 0.4, 0.67],
-          [0.6, 0.5, 1.0],
-          [0., 1., 0.],
-          [1., 0., 0.],
-          [0., 1., 1.],
-          [1., 0., 1.],
-          [1., 1., 0.],
-          [1., 1., 1.],
-          [.33, .33, .33],
-          [.5, .5, .5],
-          [.66, .66, .66]])
+         [[0, 0],
+          [135, 206],
+          [122, 197],
+          [132, 112],
+          [0, 255],
+          [255, 0],
+          [255, 255],
+          [255, 167],
+          [105, 105],
+          [190, 190],
+          [211, 211]])
+    # Training inputs for RGBcolors
+    # colors = np.array(
+    #      [[0., 0., 0.],
+    #       [0., 0., 1.],
+    #       [0., 0., 0.5],
+    #       [0.125, 0.529, 1.0],
+    #       [0.33, 0.4, 0.67],
+    #       [0.6, 0.5, 1.0],
+    #       [0., 1., 0.],
+    #       [1., 0., 0.],
+    #       [0., 1., 1.],
+    #       [1., 0., 1.],
+    #       [1., 1., 0.],
+    #       [1., 1., 1.],
+    #       [.33, .33, .33],
+    #       [.5, .5, .5],
+    #       [.66, .66, .66]])
 
-    color_names = \
-        ['black', 'blue', 'darkblue', 'skyblue',
-         'cadetblue', 'LightSlateBlue', 'green', 'red',
-         'cyan', 'violet', 'yellow', 'white',
-         'dimGrey', 'mediumgrey', 'lightgrey']
+    # color_names = \
+    #     ['black', 'blue', 'darkblue', 'skyblue',
+    #      'cadetblue', 'LightSlateBlue', 'green', 'red',
+    #      'cyan', 'violet', 'yellow', 'white',
+    #      'dimGrey', 'mediumgrey', 'lightgrey']
 
-    som = SOMs(15, colors, 400, 200, 0.3, True, 1, 3)
+    som = SOMs(15, colors, 400, 1000, 0.3, True, 1, 2)
     som.train()
+    result = som.result()
+    print(result)
+    X = []
+    Y = []
 
-    plt.imshow(som.result(), interpolation='gaussian')
+    for i in range(len(result)):
+
+        X.append(result[i][0])
+        Y.append(result[i][1])
+
+    # plt.imshow(som.result(), interpolation='gaussian')
+    plt.xlim(0, 256) 
+    plt.ylim(0, 256)
+    plt.scatter(X,Y)
     plt.show()
