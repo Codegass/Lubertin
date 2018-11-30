@@ -1,4 +1,4 @@
-#####
+
 # Author : Codegass
 
 # TODO: the map's generation is too random, till now is still a list
@@ -38,7 +38,7 @@ class node:
             print('\x1b[6;30;42m' + e.error + '\x1b[0m')
 
         self.highest = 256
-        self.node = np.random.randint(self.highest, size=shape)
+        self.node = np.random.randint(self.highest, size=shape) # BE CAREFUL: because of the size is setted as a tuple, the result will be like np.array([[1,2]]),which is a matrix inside, so if we want to get the node volume we need to call node[0].
         if isFloat:
             self.node = self.node.astype(np.float64)
 
@@ -180,12 +180,17 @@ class SOMs(object):
                 for nodeIndex in range(len(self.neighbournodes)):
                     node_next = self.Adjusting(self.neighbournodes[nodeIndex], target)
                     self.map[self.index[nodeIndex]] = node_next
-                    # print('.', end='')
+                    print('.', end='')
         print('\nTraining ended.')
 
     def result(self):
+        print(self.map[0].node)
+        print(self.map[0].node[0])
         for j in range(len(self.map)):
-            self.resultmap.append(self.map[j].node[0])
+            self.resultmap.append(self.map[j].node[0]) # The reason why using node[0] here please check the class node.__init__
+
+        print(self.resultmap)
+        print(type(self.resultmap))
         self.resultmap = np.array(self.resultmap)  # convert the arrays to np.array in order to matching the plt requirements
         return self.resultmap
 
@@ -234,7 +239,7 @@ if __name__ == '__main__':
     #      'cyan', 'violet', 'yellow', 'white',
     #      'dimGrey', 'mediumgrey', 'lightgrey']
 
-    som = SOMs(15, colors, 400, 1000, 0.3, True, 1, 2)
+    som = SOMs(100, colors, 400, 1000, 0.3, True, 1, 2)
     som.train()
     result = som.result()
     print(result)
@@ -247,7 +252,8 @@ if __name__ == '__main__':
         Y.append(result[i][1])
 
     # plt.imshow(som.result(), interpolation='gaussian')
-    plt.xlim(0, 256) 
+    plt.xlim(0, 256)
     plt.ylim(0, 256)
-    plt.scatter(X,Y)
+    T = np.arctan2(Y, X)
+    plt.scatter(X, Y, c=T, s=2)
     plt.show()
