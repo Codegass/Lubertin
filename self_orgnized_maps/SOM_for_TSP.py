@@ -1,6 +1,8 @@
 ####
 
-#TODO: STILL HAVE BUGS
+#TODO: STILL HAVE BUGS 
+# the circle's init still has bugs.
+# now the neighbours is already changed to 3 
 
 
 # Author : Codegass
@@ -29,6 +31,7 @@ import numpy as np
 import pandas as pd
 import math
 import argparse
+import random
 
 
 nodenn = None
@@ -91,6 +94,59 @@ class SOMs(SOMs):
         self.round = rounds
         self.index = []
         self.resultmap = []
+
+    def BMUCalculate(self, randomChosenData):
+        global BMUindex
+        BMUindex = 0  # the index number of the best matching unit in the map list
+        BMUindexDist = 0
+        for i in range(self.quantity):
+            node = self.map[i]
+            dist = np.linalg.norm(node.node - randomChosenData)
+            if dist >= BMUindexDist:
+                BMUindex = i
+        self.BMU = self.map[BMUindex]
+
+    def neighbours(self):
+        if BMUindex == 0:
+            self.neighbournodes = [self.map[nodenn-1], self.BMU, self.map[1]]
+            self.index = [nodenn-1, 0, 1]
+        elif BMUindex == nodenn-1:
+            self.neighbournodes = [self.map[nodenn-2], self.BMU, self.map[0]]
+            self.index = [ nodenn-2, nodenn-1, 0]
+        else:
+            self.neighbournodes = [self.map[BMUindex-1], self.BMU, self.map[BMUindex+1]]
+            self.index = [BMUindex-1, BMUindex, BMUindex+1]
+
+    def train(self):
+        '''
+        train the model with sitted parameter.
+        4 STEPS:
+        1. randomly choose a node for the data set
+        2. calculate the best match unit
+        3. calculate the neighbourhood of the best match unit
+        4. adjust all the units inside the neighbourhood.
+        5. Again from step one.
+        '''
+        for t in range(self.round):
+            print('\nEpoch %d / %d' % (t+1, self.round))
+            print('Choosing a node from the data set randomly.')
+            target = random.sample(self.data, 1)
+            self.BMUCalculate(target)
+            print('Best match unit finded.')
+            self.radiusDamping(t)
+            self.neighbours()
+            print('All neighbours finded. This BMU has %d neighbours include itself.' % len(self.neighbournodes))
+            if len(self.neighbournodes) == 0:
+                pass
+            else:
+                self.learningRateDamping(t)
+                for nodeIndex in range(len(self.neighbournodes)):
+                    node_next = self.Adjusting(self.neighbournodes[nodeIndex], target)
+                    self.map[self.index[nodeIndex]] = node_next
+                    print('.', end='')
+        print('\nTraining ended.')
+
+
 
     def result(self):
 
@@ -165,7 +221,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    filename = './asset/' + args.file
+    filename = 'self_orgnized_maps/asset/qa194.tsp' + args.file
     cities = read_tsp(filename)
     cities_map = normalize(cities[['x', 'y']])
 
@@ -180,14 +236,15 @@ if __name__ == '__main__':
         X_ori.append(cities_map['x'][i])
         Y_ori.append(cities_map['y'][i])
 
-    print('X_ori is', X_ori)
+    # print('X_ori is', X_ori)
 
     data = cities_map.values
 
-    som = SOMs(1.2, data, nodenn, 450, 0.3, 1, 2)
+    som = SOMs(1.2, data, nodenn, 10000, 0.1, 1, 2)
     som.train()
     result = som.result()
-    print(result)
+
+    # print(result)
 
     X = []
     Y = []
