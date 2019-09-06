@@ -107,5 +107,6 @@ venv.bak/
 
 # vscode
 /.vscode
+dsh.py
 
 

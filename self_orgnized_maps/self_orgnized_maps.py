@@ -239,7 +239,7 @@ if __name__ == '__main__':
     #      'cyan', 'violet', 'yellow', 'white',
     #      'dimGrey', 'mediumgrey', 'lightgrey']
 
-    som = SOMs(100, colors, 400, 1000, 0.3, True, 1, 2)
+    som = SOMs(20, colors, 400, 1000, 0.3, True, 1, 2)
     som.train()
     result = som.result()
     print(result)
